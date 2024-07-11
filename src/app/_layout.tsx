@@ -17,7 +17,7 @@ export default function Layout() {
     Inter_600SemiBold,
   });
 
-  if (fontsLoaded) return <Loading />;
+  if (!fontsLoaded) return <Loading />;
 
   return (
     <View className="flex-1 bg-zinc-950">
