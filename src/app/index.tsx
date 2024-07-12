@@ -1,5 +1,6 @@
-import { Input } from '@/components/input';
-import { View, Text, Image } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Image, Keyboard } from 'react-native';
+import { DateData } from 'react-native-calendars';
 import {
   MapPinIcon,
   Settings2Icon,
@@ -8,16 +9,27 @@ import {
   ArrowRightIcon,
 } from 'lucide-react-native';
 import { colors } from '@/styles/colors';
+import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
+import { Input } from '@/components/input';
 import { Button } from '@/components/button';
-import { useState } from 'react';
+import { Modal } from '@/components/modal';
+import { Calendar } from '@/components/calendar';
+import dayjs from 'dayjs';
 
 enum StepForm {
   TRIP_DETAILS = 1,
   ADD_EMAIL = 2,
 }
 
+enum EModal {
+  NONE = 0,
+  CALENDAR = 1,
+}
+
 export default function App() {
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
+  const [showModal, setShowModal] = useState(EModal.NONE);
+  const [selectedDates, setSelectedDates] = useState({} as DatesSelected);
 
   function handleNextStepForm() {
     if (stepForm === StepForm.TRIP_DETAILS) {
@@ -27,6 +39,16 @@ export default function App() {
 
   function handlePreviousStepForm() {
     return setStepForm(StepForm.TRIP_DETAILS);
+  }
+
+  function handleSelectDate(selectedDay: DateData) {
+    const dates = calendarUtils.orderStartsAtAndEndsAt({
+      startsAt: selectedDates.startsAt,
+      endsAt: selectedDates.endsAt,
+      selectedDay,
+    });
+
+    setSelectedDates(dates);
   }
 
   return (
@@ -56,7 +78,14 @@ export default function App() {
           <CalendarXIcon color={colors.zinc[400]} size={20} />
           <Input.Field
             placeholder="Quando ?"
+            value={selectedDates.formatDatesInText}
             editable={stepForm === StepForm.TRIP_DETAILS}
+            showSoftInputOnFocus={false}
+            onFocus={() => Keyboard.dismiss()}
+            onPressIn={() =>
+              stepForm === StepForm.TRIP_DETAILS &&
+              setShowModal(EModal.CALENDAR)
+            }
           />
         </Input>
 
@@ -94,6 +123,24 @@ export default function App() {
         </Text>
         .
       </Text>
+
+      <Modal
+        title="Datas da viagem"
+        subtitle="Selecione as datas de ida e volta da viagem"
+        visible={showModal === EModal.CALENDAR}
+        onClose={() => setShowModal(EModal.NONE)}
+      >
+        <View className="gap-4 mt-4">
+          <Calendar
+            minDate={dayjs().toISOString()}
+            onDayPress={handleSelectDate}
+            markedDates={selectedDates.dates}
+          />
+          <Button onPress={() => setShowModal(EModal.NONE)}>
+            <Button.Title>Confirmar</Button.Title>
+          </Button>
+        </View>
+      </Modal>
     </View>
   );
 }

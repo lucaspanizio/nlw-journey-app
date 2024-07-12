@@ -67,11 +67,10 @@ function orderStartsAtAndEndsAt({
 }
 
 function formatDatesInText({ startsAt, endsAt }: FormatDatesInText) {
-  const formatted = `${startsAt.date()} à ${endsAt.date()} de ${startsAt.format(
-    "MMMM"
-  )}`
-
-  return formatted
+  const monthInFull = startsAt.format('MMMM');
+  return `${startsAt.date()} à ${endsAt.date()} de ${
+    monthInFull.charAt(0).toUpperCase() + monthInFull.slice(1)
+  }`;
 }
 
 function getIntervalDates(startsAt: DateData, endsAt: DateData): MarkedDates {
