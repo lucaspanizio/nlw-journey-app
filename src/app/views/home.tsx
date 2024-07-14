@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Text, Image, Keyboard, Alert } from 'react-native';
+import { View, Text, Image, Keyboard, Alert, ScrollView } from 'react-native';
 import { DateData } from 'react-native-calendars';
 import {
   MapPinIcon,
@@ -8,6 +8,7 @@ import {
   CalendarXIcon,
   UserRoundIcon,
   ArrowRightIcon,
+  AtSignIcon,
 } from 'lucide-react-native';
 import { colors } from '@/styles/colors';
 import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
@@ -17,11 +18,13 @@ import { Modal } from '@/components/modal';
 import { Calendar } from '@/components/calendar';
 import { parseJSON } from '@/utils/parseJSON';
 import { EModal, StepForm, THomeForm } from './settings';
+import { GuestEmail } from '@/components/email';
+import { validateInput } from '@/utils/validateInput';
 import dayjs from 'dayjs';
 
 export default function Home() {
   const form = useForm<THomeForm>();
-  const { when, where } = form.watch();
+  const { when, where, newGuest, guests } = form.watch();
 
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
   const [showModal, setShowModal] = useState(EModal.NONE);
@@ -70,6 +73,29 @@ export default function Home() {
     });
 
     form.setValue('when', JSON.stringify(dates));
+  }
+
+  function handleAddGuest() {
+    if (!validateInput.email(newGuest)) {
+      return Alert.alert('Convidado', 'E-mail inválido!');
+    }
+
+    const emailAlreadyExists = guests?.find(
+      (email) => email === newGuest.toLowerCase(),
+    );
+
+    if (emailAlreadyExists) {
+      return Alert.alert('Convidado', 'Este e-mail já foi adicionado!');
+    }
+
+    const updatedGuests = [...(guests || []), newGuest.toLowerCase()];
+    form.setValue('guests', updatedGuests);
+    form.setValue('newGuest', '');
+  }
+
+  function handleRemoveGuest(emailToRemove: string) {
+    const updatedGuests = guests.filter((email) => email !== emailToRemove);
+    form.setValue('guests', updatedGuests);
   }
 
   return (
@@ -125,7 +151,22 @@ export default function Home() {
 
             <Input>
               <UserRoundIcon color={colors.zinc[400]} size={20} />
-              <Input.Field name="who" formRef={form} placeholder="Com quem ?" />
+              <Input.Field
+                value={
+                  guests?.length > 0
+                    ? `${Number(guests?.length)} pessoa(s) convidada(s)`
+                    : ''
+                }
+                formRef={form}
+                name="guests"
+                placeholder="Com quem ?"
+                autoCorrect={false}
+                showSoftInputOnFocus={false}
+                onPressIn={() => {
+                  Keyboard.dismiss();
+                  setShowModal(EModal.GUESTS);
+                }}
+              />
             </Input>
           </>
         )}
@@ -165,6 +206,45 @@ export default function Home() {
             <Button.Title>Confirmar</Button.Title>
           </Button>
         </View>
+      </Modal>
+
+      <Modal
+        title="Selecionar convidados"
+        subtitle="Os convidados irão receber e-mails para confirmar a participação na viagem."
+        visible={showModal === EModal.GUESTS}
+        onClose={() => setShowModal(EModal.NONE)}
+      >
+        <ScrollView keyboardShouldPersistTaps="handled" className="flex-1">
+          <View className="py-2 pb-5 gap-2 flex-wrap border-b border-zinc-800 items-start">
+            {guests?.length > 0 &&
+              guests.map((email) => (
+                <GuestEmail
+                  key={email}
+                  email={email}
+                  onRemove={() => handleRemoveGuest(email)}
+                />
+              ))}
+          </View>
+
+          <View className="gap-4 mt-5">
+            <Input variant="secondary">
+              <AtSignIcon color={colors.zinc[400]} size={20} />
+              <Input.Field
+                formRef={form}
+                name="newGuest"
+                placeholder="Digite o e-mail do convidado"
+                keyboardType="email-address"
+                value={newGuest}
+                returnKeyType="send"
+                onSubmitEditing={handleAddGuest}
+              />
+            </Input>
+
+            <Button onPress={handleAddGuest} accessibilityLabel="Convidar">
+              <Button.Title>Convidar</Button.Title>
+            </Button>
+          </View>
+        </ScrollView>
       </Modal>
     </View>
   );

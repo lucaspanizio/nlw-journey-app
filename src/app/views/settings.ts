@@ -6,10 +6,12 @@ export enum StepForm {
 export enum EModal {
   NONE = 0,
   CALENDAR = 1,
+  GUESTS = 2,
 }
 
 export type THomeForm = {
-  who: string;
   when: string;
   where: string;
+  guests: string[];
+  newGuest: string;
 };
