@@ -20,7 +20,12 @@ import { parseJSON } from '@/utils/parseJSON';
 import { EModal, StepForm, THomeForm } from './settings';
 import { GuestEmail } from '@/components/email';
 import { validateInput } from '@/utils/validateInput';
+import { tripServer } from '../../services/api/trip';
+import { useMutation } from '@tanstack/react-query';
+import { tripStorage } from '../../storage/trip';
 import dayjs from 'dayjs';
+import TripMapper from '../../services/mappers/TripMapper';
+import { router } from 'expo-router';
 
 export default function Home() {
   const form = useForm<THomeForm>();
@@ -28,6 +33,10 @@ export default function Home() {
 
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
   const [showModal, setShowModal] = useState(EModal.NONE);
+
+  const { mutate, isPending: loadingCreateTrip } = useMutation({
+    mutationFn: tripServer.create,
+  });
 
   function handleNextStepForm() {
     const { startsAt = null, endsAt = null } = parseJSON(when);
@@ -57,6 +66,8 @@ export default function Home() {
     if (stepForm === StepForm.TRIP_DETAILS) {
       return setStepForm(StepForm.ADD_EMAIL);
     }
+
+    if (stepForm === StepForm.ADD_EMAIL) createTrip();
   }
 
   function handlePreviousStepForm() {
@@ -96,6 +107,21 @@ export default function Home() {
   function handleRemoveGuest(emailToRemove: string) {
     const updatedGuests = guests.filter((email) => email !== emailToRemove);
     form.setValue('guests', updatedGuests);
+  }
+
+  function createTrip() {
+    const body = TripMapper.toPersistence(form.getValues());
+
+    mutate(body, {
+      onSuccess: ({ tripId }) => {
+        tripStorage.save(tripId);
+        router.navigate(`/trip/${tripId}`);
+      },
+      onError: (error) => {
+        // TODO: add toast
+        console.error('error', error);
+      },
+    });
   }
 
   return (
@@ -171,7 +197,7 @@ export default function Home() {
           </>
         )}
 
-        <Button onPress={handleNextStepForm}>
+        <Button onPress={handleNextStepForm} isLoading={loadingCreateTrip}>
           <Button.Title>
             {stepForm === StepForm.TRIP_DETAILS
               ? 'Continuar'
