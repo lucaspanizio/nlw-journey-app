@@ -21,11 +21,12 @@ import { EModal, StepForm, THomeForm } from './settings';
 import { GuestEmail } from '@/components/email';
 import { validateInput } from '@/utils/validateInput';
 import { tripServer } from '../../services/api/trip';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { tripStorage } from '../../storage/trip';
-import dayjs from 'dayjs';
-import TripMapper from '../../services/mappers/TripMapper';
 import { router } from 'expo-router';
+import { Loading } from '@/components/loading';
+import TripMapper from '../../services/mappers/TripMapper';
+import dayjs from 'dayjs';
 
 export default function Home() {
   const form = useForm<THomeForm>();
@@ -36,6 +37,20 @@ export default function Home() {
 
   const { mutate, isPending: loadingCreateTrip } = useMutation({
     mutationFn: tripServer.create,
+  });
+
+  const { isLoading: loadingGetTrip } = useQuery({
+    queryKey: ['get_trip'],
+    queryFn: async () => {
+      const tripId = await tripStorage.get();
+
+      if (tripId) {
+        const trip = await tripServer.getById(tripId);
+        router.navigate(`/trip/${trip.id}`);
+        return trip;
+      }
+      return null;
+    },
   });
 
   function handleNextStepForm() {
@@ -123,6 +138,8 @@ export default function Home() {
       },
     });
   }
+
+  if (loadingGetTrip) return <Loading />;
 
   return (
     <View className="flex-1 justify-center items-center px-5">

@@ -9,12 +9,11 @@ type TripDetails = {
   is_confirmed: boolean;
 };
 
-const getById = (id: string) =>
-  useQuery({
-    queryKey: ['get_trip_by_id', id],
-    queryFn: async () =>
-      await api.get<TripDetails>(`/trips/${id}`).then(({ data }) => data),
-  });
+const getById = async (tripId: string) => {
+  return await api
+    .get<TripDetails>(`/trips/${tripId}`)
+    .then(({ data }) => data);
+};
 
 export type TripCreate = Omit<TripDetails, 'id' | 'is_confirmed'> & {
   emails_to_invite: string[];
