@@ -1,24 +1,19 @@
-import dayjs, { Dayjs } from "dayjs"
-import { DateData, CalendarUtils } from "react-native-calendars"
-import { MarkedDates } from "react-native-calendars/src/types"
+import dayjs, { Dayjs } from 'dayjs';
+import { DateData, CalendarUtils } from 'react-native-calendars';
+import { MarkedDates } from 'react-native-calendars/src/types';
 
 type OrderStartsAtAndEndsAt = {
-  startsAt?: DateData
-  endsAt?: DateData
-  selectedDay: DateData
-}
-
-type FormatDatesInText = {
-  startsAt: Dayjs
-  endsAt: Dayjs
-}
+  startsAt?: DateData;
+  endsAt?: DateData;
+  selectedDay: DateData;
+};
 
 export type DatesSelected = {
-  startsAt: DateData | undefined
-  endsAt: DateData | undefined
-  dates: MarkedDates
-  formatDatesInText: string
-}
+  startsAt: DateData | undefined;
+  endsAt: DateData | undefined;
+  dates: MarkedDates;
+  formatDatesInText: string;
+};
 
 function orderStartsAtAndEndsAt({
   startsAt,
@@ -29,18 +24,18 @@ function orderStartsAtAndEndsAt({
     return {
       startsAt: selectedDay,
       endsAt: undefined,
-      formatDatesInText: "",
+      formatDatesInText: '',
       dates: getIntervalDates(selectedDay, selectedDay),
-    }
+    };
   }
 
   if (startsAt && endsAt) {
     return {
       startsAt: selectedDay,
       endsAt: undefined,
-      formatDatesInText: "",
+      formatDatesInText: '',
       dates: getIntervalDates(selectedDay, selectedDay),
-    }
+    };
   }
 
   if (selectedDay.timestamp <= startsAt.timestamp) {
@@ -52,7 +47,7 @@ function orderStartsAtAndEndsAt({
         startsAt: dayjs(selectedDay.dateString),
         endsAt: dayjs(startsAt.dateString),
       }),
-    }
+    };
   }
 
   return {
@@ -63,29 +58,34 @@ function orderStartsAtAndEndsAt({
       startsAt: dayjs(startsAt.dateString),
       endsAt: dayjs(selectedDay.dateString),
     }),
-  }
+  };
 }
 
+type FormatDatesInText = {
+  startsAt: Dayjs;
+  endsAt: Dayjs;
+};
+
 function formatDatesInText({ startsAt, endsAt }: FormatDatesInText) {
-  const monthInFull = startsAt.format('MMMM');
+  const monthInFull = endsAt.format('MMMM');
   return `${startsAt.date()} à ${endsAt.date()} de ${
     monthInFull.charAt(0).toUpperCase() + monthInFull.slice(1)
   }`;
 }
 
 function getIntervalDates(startsAt: DateData, endsAt: DateData): MarkedDates {
-  const start = dayjs(startsAt.dateString)
-  const end = dayjs(endsAt.dateString)
+  const start = dayjs(startsAt.dateString);
+  const end = dayjs(endsAt.dateString);
 
-  let currentDate = start
-  const datesArray: string[] = []
+  let currentDate = start;
+  const datesArray: string[] = [];
 
   while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-    datesArray.push(currentDate.format("YYYY-MM-DD"))
-    currentDate = currentDate.add(1, "day")
+    datesArray.push(currentDate.format('YYYY-MM-DD'));
+    currentDate = currentDate.add(1, 'day');
   }
 
-  let interval: MarkedDates = {}
+  let interval: MarkedDates = {};
 
   datesArray.forEach((date) => {
     interval = {
@@ -93,14 +93,15 @@ function getIntervalDates(startsAt: DateData, endsAt: DateData): MarkedDates {
       [date]: {
         selected: true,
       },
-    }
-  })
+    };
+  });
 
-  return interval
+  return interval;
 }
 
 export const calendarUtils = {
   orderStartsAtAndEndsAt,
   formatDatesInText,
+  getIntervalDates,
   dateToCalendarDate: CalendarUtils.getCalendarDateString,
-}
+};

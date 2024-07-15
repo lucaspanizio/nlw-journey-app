@@ -1,11 +1,15 @@
 import { parseJSON } from '@/utils/parseJSON';
-import { THomeForm } from '@/app/views/settings';
-import { TripCreate } from '../api/trip';
-import { DatesSelected } from '@/utils/calendarUtils';
+import { CreateTrip, TripData } from '../api/trip';
+import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
+import { CreateTripForm } from '@/types/trip';
 import dayjs from 'dayjs';
 
-class TripMapper {
-  toPersistence(dataForm: THomeForm): TripCreate {
+export type TripDomain = TripData & {
+  description: string;
+};
+
+class CreateTripMapper {
+  toPersistence(dataForm: CreateTripForm): CreateTrip {
     const { startsAt, endsAt } = parseJSON(dataForm.when) as DatesSelected;
 
     return {
@@ -15,8 +19,6 @@ class TripMapper {
       ends_at: dayjs(endsAt?.dateString).toISOString(),
     };
   }
-
-  toDomain() {}
 }
 
-export default new TripMapper();
+export default new CreateTripMapper();

@@ -10,6 +10,8 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 import { Loading } from '@/components/loading';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/services/queryClient';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -27,7 +29,9 @@ export default function Layout() {
         backgroundColor="transparent"
         translucent
       />
-      <Slot />
+      <QueryClientProvider client={queryClient}>
+        <Slot />
+      </QueryClientProvider>
     </View>
   );
 }
