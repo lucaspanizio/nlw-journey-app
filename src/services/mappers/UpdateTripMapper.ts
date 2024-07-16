@@ -2,6 +2,7 @@ import { parseJSON } from '@/utils/parseJSON';
 import { UpdateTrip, TripData } from '../api/trip';
 import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
 import { UpdateTripForm } from '@/types/trip';
+import { dateRangeWithShortMonth } from '@/utils/formatDate';
 import dayjs from 'dayjs';
 
 export type TripDomain = TripData & {
@@ -10,15 +11,6 @@ export type TripDomain = TripData & {
 };
 
 class UpdateTripMapper {
-  private formatDatesForShortenMonth(formattedDates: string) {
-    // Mês com os 3 primeiros caracteres
-    const formattedDatesArray = formattedDates.split(' ');
-    formattedDatesArray[formattedDatesArray.length - 1] = formattedDatesArray[
-      formattedDatesArray.length - 1
-    ].slice(0, 3);
-    return formattedDatesArray.join(' ');
-  }
-
   toPersistence(dataForm: UpdateTripForm, tripId: string): UpdateTrip {
     const { startsAt, endsAt } = parseJSON(dataForm.when) as DatesSelected;
 
@@ -47,7 +39,7 @@ class UpdateTripMapper {
     return {
       ...data,
       dates: formattedDates,
-      description: `${truncatedDestination} de ${this.formatDatesForShortenMonth(
+      description: `${truncatedDestination} de ${dateRangeWithShortMonth(
         formattedDates,
       )}.`,
     };
