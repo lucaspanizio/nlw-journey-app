@@ -8,25 +8,21 @@ import { router } from 'expo-router';
 import { Alert, Keyboard, ScrollView, Image, Text, View } from 'react-native';
 import { Button } from '@/components/button';
 import { Modal } from '@/components/modal';
-import { DateData } from 'react-native-calendars';
-import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
 import { validateInput } from '@/utils/validateInput';
 import { Loading } from '@/components/loading';
 import { colors } from '@/styles/colors';
 import {
   ArrowRightIcon,
   AtSignIcon,
-  CalendarXIcon,
   MapPinIcon,
   Settings2Icon,
   UserRoundIcon,
 } from 'lucide-react-native';
-import { Input } from '@/components/input';
-import { Calendar } from '@/components/calendar';
+import { Input } from '@/components/inputs/text';
 import { GuestEmail } from '@/components/email';
 import { CreateTripForm } from '@/types/trip';
 import TripMapper from '@/services/mappers/CreateTripMapper';
-import dayjs from 'dayjs';
+import { DateInput } from '@/components/inputs/date';
 
 enum StepForm {
   TRIP_DETAILS = 1,
@@ -35,8 +31,7 @@ enum StepForm {
 
 enum EModal {
   NONE = 0,
-  CALENDAR = 1,
-  GUESTS = 2,
+  GUESTS = 1,
 }
 
 export default function App() {
@@ -106,18 +101,6 @@ export default function App() {
     return setStepForm(StepForm.TRIP_DETAILS);
   }
 
-  function handleSelectDate(selectedDay: DateData) {
-    const { startsAt, endsAt } = parseJSON(when);
-
-    const dates: DatesSelected = calendarUtils.orderStartsAtAndEndsAt({
-      startsAt,
-      endsAt,
-      selectedDay,
-    });
-
-    form.setValue('when', JSON.stringify(dates));
-  }
-
   function handleAddGuest() {
     if (!validateInput.email(newGuest)) {
       return Alert.alert('Convidado', 'E-mail inválido!');
@@ -183,22 +166,16 @@ export default function App() {
           />
         </Input>
 
-        <Input>
-          <CalendarXIcon color={colors.zinc[400]} size={20} />
-          <Input.Field
-            name="when"
-            formRef={form}
-            placeholder="Quando ?"
-            value={parseJSON(when).formatDatesInText}
-            editable={stepForm === StepForm.TRIP_DETAILS}
-            showSoftInputOnFocus={false}
-            onFocus={() => Keyboard.dismiss()}
-            onPressIn={() =>
-              stepForm === StepForm.TRIP_DETAILS &&
-              setShowModal(EModal.CALENDAR)
-            }
-          />
-        </Input>
+        <DateInput
+          name="when"
+          formRef={form}
+          placeholder="Quando ?"
+          value={parseJSON(when).formatDatesInText}
+          modalOptions={{
+            title: 'Datas da viagem',
+            subtitle: 'Selecione as datas de ida e volta da viagem',
+          }}
+        />
 
         {stepForm === StepForm.ADD_EMAIL && (
           <>
@@ -249,24 +226,6 @@ export default function App() {
         </Text>
         .
       </Text>
-
-      <Modal
-        title="Datas da viagem"
-        subtitle="Selecione as datas de ida e volta da viagem"
-        visible={showModal === EModal.CALENDAR}
-        onClose={() => setShowModal(EModal.NONE)}
-      >
-        <View className="gap-4 mt-4">
-          <Calendar
-            minDate={dayjs().toISOString()}
-            onDayPress={handleSelectDate}
-            markedDates={parseJSON(when).dates}
-          />
-          <Button onPress={() => setShowModal(EModal.NONE)}>
-            <Button.Title>Confirmar</Button.Title>
-          </Button>
-        </View>
-      </Modal>
 
       <Modal
         title="Selecionar convidados"
