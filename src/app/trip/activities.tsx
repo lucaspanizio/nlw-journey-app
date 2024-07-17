@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Alert, SectionList } from 'react-native';
 import { TripDomain } from '@/services/mappers/CreateTripMapper';
 import { Button } from '@/components/button';
 import { ClockIcon, PlusIcon, TagIcon } from 'lucide-react-native';
@@ -9,20 +9,63 @@ import { Input } from '@/components/inputs/text';
 import { useForm } from 'react-hook-form';
 import { DateInput } from '@/components/inputs/date';
 import { isoToFullDateWithShortMonth } from '@/utils/formatDate';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { activitiesServer } from '@/services/api/activities';
+import dayjs from 'dayjs';
+import { Activity } from '@/components/activity';
+import ActivitiesMapper from '@/services/mappers/ActivitiesMapper';
 
-enum EModal {
-  NONE = 0,
-  NEW_ACTIVITY = 1,
-}
+type TActivityForm = { date: string; hour: string; description: string };
 
 interface IActivitiesProps {
   tripData: TripDomain;
 }
 
 export function Activities({ tripData }: IActivitiesProps) {
-  const [showModal, setShowModal] = useState(EModal.NONE);
-  const form = useForm<{ date: string; hour: string; description: string }>();
-  const date = form.watch('date');
+  const [showModal, setShowModal] = useState(false);
+  const tripId = tripData.id;
+
+  const form = useForm<TActivityForm>({
+    defaultValues: { date: '', hour: '', description: '' },
+  });
+  const { description, date, hour } = form.watch();
+
+  const { data: activitiesData = [], refetch } = useQuery({
+    queryKey: ['get_activities', tripId],
+    queryFn: () =>
+      activitiesServer
+        .getByTripId(tripId)
+        .then((data) => ActivitiesMapper.toDomain(data)),
+  });
+
+  const { mutate: create, isPending: isCreating } = useMutation({
+    mutationKey: ['create_activity'],
+    mutationFn: activitiesServer.create,
+  });
+
+  async function handleCreateActivity() {
+    if (!description || !date || !hour) {
+      return Alert.alert('Cadastrar atividade, "Preencha todos os campos!"');
+    }
+
+    const body = {
+      tripId,
+      occurs_at: dayjs(date).add(Number(hour), 'h').toString(),
+      title: description,
+    };
+
+    create(body, {
+      onSuccess: () => {
+        refetch();
+        form.reset();
+        setShowModal(false);
+        Alert.alert('', 'Atividade cadastrada com sucesso!');
+      },
+      onError: (error) => {
+        console.error(String(error));
+      },
+    });
+  }
 
   return (
     <View className="flex-1">
@@ -31,17 +74,23 @@ export function Activities({ tripData }: IActivitiesProps) {
           Atividades
         </Text>
 
-        <Button onPress={() => setShowModal(EModal.NEW_ACTIVITY)}>
+        <Button onPress={() => setShowModal(true)}>
           <PlusIcon color={colors.lime[950]} />
           <Button.Title>Nova atividade</Button.Title>
         </Button>
       </View>
 
+      <SectionList
+        sections={activitiesData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Activity data={item} />}
+      />
+
       <Modal
-        visible={showModal === EModal.NEW_ACTIVITY}
+        visible={showModal}
         title="Cadastrar atividade"
         subtitle="Todos os convidados podem visualizar as atividades"
-        onClose={() => setShowModal(EModal.NONE)}
+        onClose={() => setShowModal(false)}
       >
         <View className="mt-4 mb-3">
           <Input variant="secondary">
@@ -70,7 +119,7 @@ export function Activities({ tripData }: IActivitiesProps) {
                 subtitle: 'Selecione a data da atividade',
                 minDate: tripData.starts_at,
                 maxDate: tripData.ends_at,
-                onClose: () => setShowModal(EModal.NEW_ACTIVITY),
+                onClose: () => setShowModal(true),
               }}
             />
 
@@ -86,6 +135,10 @@ export function Activities({ tripData }: IActivitiesProps) {
             </Input>
           </View>
         </View>
+
+        <Button onPress={handleCreateActivity} isLoading={isCreating}>
+          <Button.Title>Salvar atividade</Button.Title>
+        </Button>
       </Modal>
     </View>
   );

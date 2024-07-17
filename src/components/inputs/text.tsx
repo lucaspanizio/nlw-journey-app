@@ -59,12 +59,12 @@ function Field<T extends FieldValues>({
       <Controller
         control={control}
         name={name}
-        rules={{ maxLength }}
         render={({ field: { onChange, onBlur } }) => (
           <TextInput
             className="flex-1 text-zinc-100 text-lg font-regular"
             placeholderTextColor={colors.zinc[400]}
             cursorColor={colors.zinc[100]}
+            maxLength={maxLength}
             selectionColor={
               Platform.OS === 'ios' ? colors.zinc[100] : undefined
             }

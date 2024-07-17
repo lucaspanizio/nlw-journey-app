@@ -19,17 +19,17 @@ const create = async ({ tripId, occurs_at, title }: ActivityCreate) => {
     .then(({ data }) => data);
 };
 
-type Activities = {
+export type Activities = {
   activities: {
     date: string;
     activities: Activity[];
   }[];
 };
 
-const getActivities = async (tripId: string) => {
+const getByTripId = async (tripId: string) => {
   return await api
     .get<Activities>(`/trips/${tripId}/activities`)
     .then(({ data }) => data);
 };
 
-export const activitiesServer = { create, getActivities };
+export const activitiesServer = { create, getByTripId };
