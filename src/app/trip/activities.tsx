@@ -14,6 +14,7 @@ import { activitiesServer } from '@/services/api/activities';
 import dayjs from 'dayjs';
 import { Activity } from '@/components/activity';
 import ActivitiesMapper from '@/services/mappers/ActivitiesMapper';
+import { Loading } from '@/components/loading';
 
 type TActivityForm = { date: string; hour: string; description: string };
 
@@ -30,7 +31,11 @@ export function Activities({ tripData }: IActivitiesProps) {
   });
   const { description, date, hour } = form.watch();
 
-  const { data: activitiesData = [], refetch } = useQuery({
+  const {
+    data: activitiesData = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['get_activities', tripId],
     queryFn: () =>
       activitiesServer
@@ -80,11 +85,32 @@ export function Activities({ tripData }: IActivitiesProps) {
         </Button>
       </View>
 
-      <SectionList
-        sections={activitiesData}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Activity data={item} />}
-      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <SectionList
+          sections={activitiesData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <Activity data={item} />}
+          renderSectionHeader={({ section }) => (
+            <View className="w-full">
+              <Text className="text-zinc-50 text-xl font-semibold py-2">
+                Dia {section.title.dayNumber + ' '}
+                <Text className="text-zinc-500 text-base font-regular capitalize">
+                  {section.title.dayName}
+                </Text>
+              </Text>
+              {section.data.length === 0 && (
+                <Text className="text-zinc-500 text-md font-regular">
+                  Nenhuma atividade cadastrada para esse dia.
+                </Text>
+              )}
+            </View>
+          )}
+          contentContainerClassName="gap-3 pb-48"
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       <Modal
         visible={showModal}
