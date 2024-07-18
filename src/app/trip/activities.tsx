@@ -1,22 +1,23 @@
+import dayjs from 'dayjs';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { View, Text, Alert, SectionList } from 'react-native';
-import { TripDomain } from '@/services/mappers/CreateTripMapper';
-import { Button } from '@/components/button';
 import { ClockIcon, PlusIcon, TagIcon } from 'lucide-react-native';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { colors } from '@/styles/colors';
+import { Button } from '@/components/button';
 import { Modal } from '@/components/modal';
 import { Input } from '@/components/inputs/text';
-import { useForm } from 'react-hook-form';
 import { DateInput } from '@/components/inputs/date';
-import { isoToFullDateWithShortMonth } from '@/utils/formatDate';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { activitiesServer } from '@/services/api/activities';
-import dayjs from 'dayjs';
-import { Activity } from '@/components/activity';
-import ActivitiesMapper from '@/services/mappers/ActivitiesMapper';
 import { Loading } from '@/components/loading';
-
-type TActivityForm = { date: string; hour: string; description: string };
+import { Activity } from '@/components/activity';
+import { schema } from '@/types/schemas';
+import { ActivityForm } from '@/types/forms';
+import { isoToFullDateWithShortMonth } from '@/utils/formatDate';
+import { activitiesServer } from '@/services/api/activities';
+import { TripDomain } from '@/services/mappers/CreateTripMapper';
+import ActivitiesMapper from '@/services/mappers/ActivitiesMapper';
 
 interface IActivitiesProps {
   tripData: TripDomain;
@@ -26,10 +27,11 @@ export function Activities({ tripData }: IActivitiesProps) {
   const [showModal, setShowModal] = useState(false);
   const tripId = tripData.id;
 
-  const form = useForm<TActivityForm>({
+  const form = useForm<ActivityForm>({
     defaultValues: { date: '', hour: '', description: '' },
+    resolver: zodResolver(schema.createActivity),
   });
-  const { description, date, hour } = form.watch();
+  const { date } = form.watch();
 
   const {
     data: activitiesData = [],
@@ -48,10 +50,13 @@ export function Activities({ tripData }: IActivitiesProps) {
     mutationFn: activitiesServer.create,
   });
 
-  async function handleCreateActivity() {
-    if (!description || !date || !hour) {
-      return Alert.alert('Cadastrar atividade, "Preencha todos os campos!"');
-    }
+  function handleCloseModal() {
+    form.reset();
+    setShowModal(false);
+  }
+
+  async function handleCreateActivity(formData: ActivityForm) {
+    const { description, date, hour } = formData;
 
     const body = {
       tripId,
@@ -62,8 +67,7 @@ export function Activities({ tripData }: IActivitiesProps) {
     create(body, {
       onSuccess: () => {
         refetch();
-        form.reset();
-        setShowModal(false);
+        handleCloseModal();
         Alert.alert('', 'Atividade cadastrada com sucesso!');
       },
       onError: (error) => {
@@ -116,7 +120,7 @@ export function Activities({ tripData }: IActivitiesProps) {
         visible={showModal}
         title="Cadastrar atividade"
         subtitle="Todos os convidados podem visualizar as atividades"
-        onClose={() => setShowModal(false)}
+        onClose={handleCloseModal}
       >
         <View className="mt-4 mb-3">
           <Input variant="secondary">
@@ -162,7 +166,10 @@ export function Activities({ tripData }: IActivitiesProps) {
           </View>
         </View>
 
-        <Button onPress={handleCreateActivity} isLoading={isCreating}>
+        <Button
+          onPress={form.handleSubmit(handleCreateActivity)}
+          isLoading={isCreating}
+        >
           <Button.Title>Salvar atividade</Button.Title>
         </Button>
       </Modal>

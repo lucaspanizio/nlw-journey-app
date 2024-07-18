@@ -18,29 +18,24 @@ import {
   Settings2Icon,
   UserRoundIcon,
 } from 'lucide-react-native';
+import { CreateTripForm } from '@/types/forms';
 import { Input } from '@/components/inputs/text';
 import { GuestEmail } from '@/components/email';
-import { CreateTripForm } from '@/types/trip';
-import TripMapper from '@/services/mappers/CreateTripMapper';
 import { DateInput } from '@/components/inputs/date';
+import TripMapper from '@/services/mappers/CreateTripMapper';
 
 enum StepForm {
   TRIP_DETAILS = 1,
   ADD_EMAIL = 2,
 }
 
-enum EModal {
-  NONE = 0,
-  GUESTS = 1,
-}
-
 export default function App() {
   const form = useForm<CreateTripForm>();
   const { when, where, newGuest, guests } = form.watch();
 
-  const [isGettingTrip, setIsGettingTrip] = useState(false);
   const [stepForm, setStepForm] = useState(StepForm.TRIP_DETAILS);
-  const [showModal, setShowModal] = useState(EModal.NONE);
+  const [showModal, setShowModal] = useState(false);
+  const [isGettingTrip, setIsGettingTrip] = useState(false);
 
   const { mutate, isPending: loadingCreateTrip } = useMutation({
     mutationFn: tripServer.create,
@@ -68,7 +63,7 @@ export default function App() {
   function handleNextStepForm() {
     const { startsAt = null, endsAt = null } = parseJSON(when);
 
-    // TODO: Transformar em schema e apresentar erros abaixo do input
+    // TODO: Trabalhar com schema
     if (!where) {
       return Alert.alert(
         'Destino da viagem',
@@ -102,6 +97,7 @@ export default function App() {
   }
 
   function handleAddGuest() {
+    // TODO: trabalhar com schema
     if (!validateInput.email(newGuest)) {
       return Alert.alert('Convidado', 'E-mail inválido!');
     }
@@ -201,7 +197,7 @@ export default function App() {
                 showSoftInputOnFocus={false}
                 onPressIn={() => {
                   Keyboard.dismiss();
-                  setShowModal(EModal.GUESTS);
+                  setShowModal(true);
                 }}
               />
             </Input>
@@ -230,8 +226,8 @@ export default function App() {
       <Modal
         title="Selecionar convidados"
         subtitle="Os convidados irão receber e-mails para confirmar a participação na viagem."
-        visible={showModal === EModal.GUESTS}
-        onClose={() => setShowModal(EModal.NONE)}
+        visible={showModal}
+        onClose={() => setShowModal(false)}
       >
         <ScrollView keyboardShouldPersistTaps="handled" className="flex-1">
           <View className="py-2 pb-5 gap-2 flex-wrap border-b border-zinc-800 items-start">
