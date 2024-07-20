@@ -139,11 +139,7 @@ export function Activities({ tripData }: IActivitiesProps) {
               formRef={form}
               placeholder="Data"
               className="flex-1"
-              value={
-                tripData.starts_at <= date && tripData.ends_at >= date
-                  ? isoToFullDateWithShortMonth(date)
-                  : ''
-              }
+              value={date && isoToFullDateWithShortMonth(date)}
               modalOptions={{
                 title: 'Data da atividade',
                 subtitle: 'Selecione a data da atividade',

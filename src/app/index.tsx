@@ -41,16 +41,15 @@ export default function App() {
     mutationFn: tripServer.create,
   });
 
+  // NOTE: este hook deveria estar na página de login e o clean cache no logout
   useEffect(() => {
     setIsGettingTrip(true);
 
-    async function getTrip() {
-      return await tripStorage.get();
-    }
+    const getTrip = async () => await tripStorage.get();
 
     getTrip()
       .then((id) => {
-        router.navigate(`/trip/${id}`);
+        if (id) router.navigate(`/trip/${id}`);
       })
       .catch((error) => {
         console.error('Error fetching trip ID:', error);
@@ -151,8 +150,8 @@ export default function App() {
         Convide seus amigos e agende sua{'\n'}próxima viagem
       </Text>
 
-      <View className="w-full bg-zinc-900 px-4 pt-2 pb-6 rounded-lg m-8 border border-zinc-800">
-        <Input>
+      <View className="w-full bg-zinc-900 px-4 py-4 rounded-lg m-8 border border-zinc-800">
+        <Input className="border-b border-zinc-700">
           <MapPinIcon color={colors.zinc[400]} size={20} />
           <Input.Field
             name="where"
@@ -165,7 +164,10 @@ export default function App() {
         <DateInput
           name="when"
           formRef={form}
+          variant="primary"
+          className="mb-2"
           placeholder="Quando ?"
+          editable={stepForm === StepForm.TRIP_DETAILS}
           value={parseJSON(when).formatDatesInText}
           modalOptions={{
             title: 'Datas da viagem',
