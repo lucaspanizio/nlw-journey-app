@@ -1,7 +1,7 @@
 import { parseJSON } from '@/utils/parseJSON';
 import { CreateTrip, TripData } from '../api/trip';
-import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
-import { CreateTripForm } from '@/types/trip';
+import { DatesSelected } from '@/utils/calendarUtils';
+import { CreateTripForm } from '@/types/forms';
 import dayjs from 'dayjs';
 
 export type TripDomain = TripData & {

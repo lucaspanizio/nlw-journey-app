@@ -1,7 +1,7 @@
 import { parseJSON } from '@/utils/parseJSON';
 import { UpdateTrip, TripData } from '../api/trip';
-import { calendarUtils, DatesSelected } from '@/utils/calendarUtils';
-import { UpdateTripForm } from '@/types/trip';
+import { DatesSelected } from '@/utils/calendarUtils';
+import { UpdateTripForm } from '@/types/forms';
 import { dateRangeWithShortMonth } from '@/utils/formatDate';
 import dayjs from 'dayjs';
 
@@ -31,17 +31,12 @@ class UpdateTripMapper {
         ? `${destination.slice(0, maxLengthDescription)}...`
         : destination;
 
-    const formattedDates = calendarUtils.formatDatesInText({
-      startsAt: dayjs(starts_at),
-      endsAt: dayjs(ends_at),
-    });
+    const formattedDates = dateRangeWithShortMonth(starts_at, ends_at);
 
     return {
       ...data,
       dates: formattedDates,
-      description: `${truncatedDestination} de ${dateRangeWithShortMonth(
-        formattedDates,
-      )}.`,
+      description: `${truncatedDestination} de ${formattedDates}.`,
     };
   }
 }
