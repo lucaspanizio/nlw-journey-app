@@ -46,15 +46,19 @@ function Button({
   );
 }
 
-function Title({ children }: TextProps) {
+function Title({ children, className }: TextProps) {
   const { variant } = useContext(ButtonContext);
 
   return (
     <Text
-      className={clsx('text-base font-semibold', {
-        'text-lime-950': variant === 'primary',
-        'text-zinc-200': variant === 'secondary',
-      })}
+      className={clsx(
+        'text-base font-semibold',
+        {
+          'text-lime-950': variant === 'primary',
+          'text-zinc-200': variant === 'secondary',
+        },
+        className,
+      )}
     >
       {children}
     </Text>
