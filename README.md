@@ -27,7 +27,9 @@
   <a href="https://tailwindcss.com/" target="_blank"><img src="https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailWind CSS"></a>
   <a href="https://lucide.dev/" target="_blank"><img src="https://img.shields.io/badge/lucide%20icons-161618.svg?style=for-the-badge&logoColor=white" alt="Lucide Icons"/></a>
   <a href="https://axios-http.com/" target="_blank"><img src="https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white" alt="Axios"/></a>
-  <a href="https://tanstack.com/" target="_blank"><img src="https://img.shields.io/badge/-React%20Query-FF4154?style=for-the-badge&logo=react%20query&logoColor=white" alt="Tanstack Query"/></a>  
+  <a href="https://zod.dev/" target="_blank"><img src="https://img.shields.io/badge/Zod-%233167b5?style=for-the-badge&logo=zod&logoColor=%23152642" alt="Zod"/></a>
+  <a href="https://react-hook-form.com/" target="_blank"><img src="https://img.shields.io/badge/React%20Hook%20Form-%23EC5990.svg?style=for-the-badge&logo=reacthookform&logoColor=white" alt="React Hook Form"/></a>  
+  <a href="https://tanstack.com/" target="_blank"><img src="https://img.shields.io/badge/-Tanstack%20Query-FF4154?style=for-the-badge&logo=react%20query&logoColor=white" alt="Tanstack Query"/></a>  
 </div>
 <br>
 
