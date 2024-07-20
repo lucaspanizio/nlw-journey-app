@@ -24,8 +24,8 @@ const create = async (body: CreateTrip) => {
   return api
     .post<{ tripId: string }>(`/trips`, {
       ...body,
-      owner_name: 'Diego',
-      owner_email: 'diego@email.com',
+      owner_name: 'Panizio',
+      owner_email: 'panizio@email.com',
     })
     .then(({ data }) => data);
 };
