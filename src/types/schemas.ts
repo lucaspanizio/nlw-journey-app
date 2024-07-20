@@ -20,8 +20,17 @@ const createLink = z.object({
   url: z.string().url({ message: 'URL inválida' }),
 });
 
+const confirmParticipation = z.object({
+  name: z.string().trim().min(1, { message: 'Campo obrigatório' }),
+  email: z
+    .string()
+    .min(1, { message: 'Campo obrigatório' })
+    .email({ message: 'E=mail inválido' }),
+});
+
 export const schema = {
   updateTrip,
   createActivity,
   createLink,
+  confirmParticipation,
 };

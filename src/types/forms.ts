@@ -8,6 +8,10 @@ export type CreateTripForm = {
   newGuest: string;
 };
 
+export type ConfirmParticipationForm = z.infer<
+  typeof schema.confirmParticipation
+>;
+
 export type UpdateTripForm = z.infer<typeof schema.updateTrip>;
 
 export type ActivityForm = z.infer<typeof schema.createActivity>;
